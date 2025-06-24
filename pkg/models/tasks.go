@@ -31,20 +31,60 @@ func init() {
 	}
 }
 
-func AddTask(task *Task) *Task {
-	db.Create(task)
-	return task
+func AddTask(task *Task) (*Task, error) {
+	result := db.Create(task)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return task, nil
 }
 
-func GetTask() []Task {
-	var Tasks []Task
-	db.Find(&Tasks)
-	return Tasks
+func GetTasks() []Task {
+	var tasks []Task
+	db.Find(&tasks)
+	return tasks
 }
 
-func DeleteTask(Id int64) Task {
-	fmt.Println("Id : ", Id)
+func DeleteTask(id int64) (Task, error) {
 	var task Task
-	db.Where("ID=?", Id).Find(&task)
-	return task
+
+	result := db.First(&task, id)
+	if result.Error != nil {
+		fmt.Println("Task not found:", result.Error)
+		return Task{}, result.Error
+	}
+
+	if err := db.Delete(&task).Error; err != nil {
+		fmt.Println("Delete failed:", err)
+		return Task{}, err
+	}
+
+	return task, nil
+}
+
+func GetTaskById(id int64) (Task, error) {
+	var task Task
+	result := db.First(&task, id)
+	if result.Error != nil {
+		return Task{}, result.Error
+	}
+	return task, nil
+}
+
+func UpdateStatusById(id int64) (Task, error) {
+	var task Task
+	result := db.First(&task, id)
+	if result.Error != nil {
+		return Task{}, result.Error
+	}
+	if task.Status == Completed {
+		task.Status = Pending
+	} else {
+		task.Status = Completed
+	}
+	if err := db.Save(&task).Error; err != nil {
+		fmt.Println("Delete failed:", err)
+		return Task{}, err
+	}
+	return task, nil
 }

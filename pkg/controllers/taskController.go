@@ -20,27 +20,31 @@ func AddTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	newTask.Status = models.Pending
-	task := models.AddTask(&newTask)
+	task, err1 := models.AddTask(&newTask)
+	if err1 != nil {
+		http.Error(w, err1.Error(), http.StatusBadRequest)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 }
 
 func GetTaskById(w http.ResponseWriter, r *http.Request) {
-	// params := mux.Vars(r)
-	// idStr := params["id"]
-	// fmt.Println("Params : ", idStr)
-	// id, err := strconv.ParseInt(idStr, 10, 64)
-	// if err != nil {
-	// 	http.Error(w, "Invalid task ID", http.StatusBadRequest)
-	// 	return
-	// }
-	// task, exists := tasks[id]
-	// if !exists {
-	// 	http.Error(w, "Task not found", http.StatusNotFound)
-	// 	return
-	// }
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(task)
+	params := mux.Vars(r)
+	idStr := params["id"]
+	fmt.Println("Params : ", idStr)
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+	task, err1 := models.GetTaskById(id)
+	if err1 != nil {
+		http.Error(w, err1.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(task)
 }
 
 func DeleteTaskById(w http.ResponseWriter, r *http.Request) {
@@ -53,63 +57,59 @@ func DeleteTaskById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid task Id", http.StatusBadRequest)
 		return
 	}
-	task := models.DeleteTask(id)
+	task, error1 := models.DeleteTask(id)
+	if error1 != nil {
+		http.Error(w, error1.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 }
 
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	tasks := models.GetTask()
+	tasks := models.GetTasks()
 	json.NewEncoder(w).Encode(tasks)
 }
 
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
-	// var task models.Task
-	// json.NewDecoder(r.Body).Decode(&task)
-	// fmt.Println(task)
-	// params := mux.Vars(r)
-	// idStr := params["id"]
-	// id, err := strconv.ParseInt(idStr, 10, 64)
-	// if err != nil {
-	// 	http.Error(w, "Invalid ID", http.StatusBadRequest)
-	// 	return
-	// }
-	// already, exists := tasks[id]
-	// if !exists {
-	// 	http.Error(w, "Task not found with the Id", http.StatusNotFound)
-	// 	return
-	// }
-	// if task.Name != "" {
-	// 	already.Name = task.Name
-	// }
-	// if task.Description != "" {
-	// 	already.Description = task.Description
-	// }
-	// tasks[id] = already
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{"message": "Task Updated successfully"})
+	var task models.Task
+	json.NewDecoder(r.Body).Decode(&task)
+	fmt.Println(task)
+	params := mux.Vars(r)
+	idStr := params["id"]
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	_, err1 := models.DeleteTask(id)
+	if err1 != nil {
+		http.Error(w, err1.Error(), http.StatusBadRequest)
+		return
+	}
+	_, err2 := models.AddTask(&task)
+	if err2 != nil {
+		http.Error(w, err2.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Task Updated successfully"})
 }
 
 func UpdateTaskStatus(w http.ResponseWriter, r *http.Request) {
-	// params := mux.Vars(r)
-	// idStr := params["id"]
-	// id, err := strconv.ParseInt(idStr, 10, 64)
-	// if err != nil {
-	// 	http.Error(w, "Invalid ID", http.StatusBadRequest)
-	// 	return
-	// }
-	// already, exists := tasks[id]
-	// if !exists {
-	// 	http.Error(w, "Task not found with the Id", http.StatusNotFound)
-	// 	return
-	// }
-	// if already.Status == models.Pending {
-	// 	already.Status = models.Completed
-	// } else {
-	// 	already.Status = models.Pending
-	// }
-	// tasks[id] = already
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{"message": "Task Marked successfully"})
+	params := mux.Vars(r)
+	idStr := params["id"]
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	task, err := models.UpdateStatusById(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(task)
 }

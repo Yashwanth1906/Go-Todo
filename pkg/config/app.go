@@ -29,3 +29,7 @@ func Connect() {
 func GetDB() *gorm.DB {
 	return db
 }
+
+// func SetDB(dsn *gorm.DB) {
+// 	db = dsn
+// }
