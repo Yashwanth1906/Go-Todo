@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/Yashwanth1906/Go-Todo/backend/pkg/config"
+	"github/Yashwanth1906/Go-Todo/pkg/config"
+
 	_ "github.com/lib/pq"
 )
 
@@ -164,8 +165,8 @@ func GetTaskById(id int64) (Task, error) {
 func UpdateStatusById(id int64) (Task, error) {
 	var task Task
 	var statusStr string
-	selectQuery := `SELECT id, name, description, status FROM tasks WHERE id = $1`	
-	
+	selectQuery := `SELECT id, name, description, status FROM tasks WHERE id = $1`
+
 	err := db.QueryRow(selectQuery, id).Scan(&task.ID, &task.Name, &task.Description, &statusStr)
 	if err != nil {
 		if err == sql.ErrNoRows {

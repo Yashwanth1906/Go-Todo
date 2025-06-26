@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Yashwanth1906/Go-Todo/pkg/models"
+	"github/Yashwanth1906/Go-Todo/pkg/models"
+
 	"github.com/gorilla/mux"
 )
 

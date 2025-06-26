@@ -1,16 +1,16 @@
 package config
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
 var (
-	db *gorm.DB
+	db *sql.DB
 )
 
 func Connect() {
@@ -19,14 +19,18 @@ func Connect() {
 		log.Fatal("Error loading .env file")
 	}
 	dsn := os.Getenv("DATABASE_URL")
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	database, err := sql.Open("postgres", dsn)
 	if err != nil {
 		panic(err)
+	}
+
+	if err = database.Ping(); err != nil {
+		log.Fatal(err)
 	}
 	db = database
 }
 
-func GetDB() *gorm.DB {
+func GetDB() *sql.DB {
 	return db
 }
 

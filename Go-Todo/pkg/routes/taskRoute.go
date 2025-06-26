@@ -1,7 +1,8 @@
 package routes
 
 import (
-	"github.com/Yashwanth1906/Go-Todo/pkg/controllers"
+	"github/Yashwanth1906/Go-Todo/pkg/controllers"
+
 	"github.com/gorilla/mux"
 )
 
