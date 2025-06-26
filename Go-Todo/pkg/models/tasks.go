@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github/Yashwanth1906/Go-Todo/pkg/config"
 
@@ -48,10 +49,15 @@ func StatusFromString(s string) Status {
 }
 
 func init() {
+	log.Println("InitDB called - setting up database connection")
 	config.Connect()
 	db = config.GetDB()
-	// dropTable() // whenever i ever migrate i need to drop the table if i want to....
+	if db == nil {
+		log.Fatal("Database connection is nil after config.GetDB()")
+	}
+	log.Println("Database connection obtained, running migrations...")
 	migrateDB()
+	log.Println("Database initialization completed")
 }
 
 func dropTable() {
@@ -99,23 +105,39 @@ func AddTask(task *Task) (*Task, error) {
 }
 
 func GetTasks() []Task {
+	log.Println("GetTasks called in models")
+	db = config.GetDB()
+	fmt.Println(db)
+	if db == nil {
+		log.Fatal("Database connection is nil in GetTasks")
+		return []Task{}
+	}
+
 	query := `SELECT id, name, description, status FROM tasks ORDER BY id`
+	log.Printf("Executing query: %s", query)
+
 	rows, err := db.Query(query)
 	if err != nil {
+		log.Printf("Error executing query: %v", err)
 		return []Task{}
 	}
 	defer rows.Close()
+
 	var tasks []Task
 	for rows.Next() {
 		var task Task
 		var statusStr string
 		err := rows.Scan(&task.ID, &task.Name, &task.Description, &statusStr)
 		if err != nil {
+			log.Printf("Error scanning row: %v", err)
 			continue
 		}
 		task.Status = StatusFromString(statusStr)
 		tasks = append(tasks, task)
+		log.Printf("Scanned task: %+v", task)
 	}
+
+	log.Printf("GetTasks returning %d tasks", len(tasks))
 	return tasks
 }
 
