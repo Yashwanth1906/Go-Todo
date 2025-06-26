@@ -28,7 +28,7 @@ function App() {
   },[])
   return (
     <>
-        <p></p>
+        <p>Hello world</p>
     </>
   )
 }
